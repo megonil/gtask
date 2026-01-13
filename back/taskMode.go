@@ -19,5 +19,6 @@ func (m taskMode) String() string {
 }
 
 func taskModeFromString(str string) (taskMode, error) {
+
 	return 0, nil
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
 )
 
 type task struct {
@@ -43,47 +44,65 @@ func LoadTasks() error {
 }
 
 func ListTasks() {
+	if len(tasks) == 0 {
+		fmt.Println("List is empty")
+		return
+	}
 	for i := range tasks {
 		fmt.Printf("%d. %s: %s\n", i+1, tasks[i].Title, tasks[i].Mode.String())
 	}
 }
 
-func AddTask(title string) error {
+func AddTask(title string) (int, error) {
+	if idx := findByTitle(title); idx != -1 {
+		return idx, errors.New("task with such title already existing")
+	}
 	var newTask = task{Title: title, Mode: modePlanned}
 
 	tasks = append(tasks, newTask)
-	return writeTasks()
+	return len(tasks), writeTasks()
 }
 
-func RemoveTask(title string) error {
-	idx := slices.IndexFunc(tasks, func(t task) bool { return t.Title == title })
-	if idx == -1 {
-		return errors.New("no task with such title")
+func Remove(args []string) error {
+	var toDelete = make(map[int]bool)
+
+	for _, arg := range args {
+		if num, err := strconv.Atoi(arg); err == nil {
+			if num > 0 && num <= len(tasks) {
+				toDelete[num-1] = true
+				continue
+			}
+		}
+
+		var idx = findByTitle(arg)
+		if idx == -1 {
+			return errors.New(fmt.Sprint("no task with title %s", arg))
+		}
+		toDelete[idx] = true
 	}
 
-	tasks = remove(tasks, idx)
-	if tasks == nil {
-		return errors.New("cannot remove task")
+	if len(toDelete) == 0 {
+		fmt.Println("nothing to do")
+		return nil
 	}
 
-	return writeTasks()
-}
+	var i int
+	tasks = slices.DeleteFunc(tasks, func(t task) bool {
+		var shouldDelete = toDelete[i]
+		i++
+		return shouldDelete
+	})
 
-func RemoveTaskByID(idx int) error {
-	if idx < 0 || idx >= len(tasks) {
-		return errors.New("invalid index")
-	}
-
-	tasks = remove(tasks, idx)
 	return writeTasks()
 }
 
 func MarkTask(title string, mode taskMode) error {
 	var idx = findByTitle(title)
+
 	if idx == -1 {
 		return errors.New("no task with such title")
 	}
-	tasks[idx].Mode = mode
 
+	tasks[idx].Mode = mode
 	return writeTasks()
 }

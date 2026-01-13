@@ -60,10 +60,6 @@ func checkString(want string, found string) bool {
 	return false
 }
 
-func remove[T any](slice []T, idx int) []T {
-	return append(slice[:idx], slice[idx+1:]...)
-}
-
 func findByTitle(title string) int {
 	return slices.IndexFunc(tasks, func(t task) bool { return t.Title == title })
 }
