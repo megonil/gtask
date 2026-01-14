@@ -56,8 +56,8 @@ func writeTasks() error {
 	return os.WriteFile(tasksJSONPath, data, 0644)
 }
 
-func checkString(want string, found string) bool {
-	return false
+func checkString(found string, want string) bool {
+	return (found[0] == want[0] && len(found) == 1) || (found == want)
 }
 
 func findByTitle(title string) int {

@@ -76,7 +76,7 @@ func Remove(args []string) error {
 
 		var idx = findByTitle(arg)
 		if idx == -1 {
-			return errors.New(fmt.Sprint("no task with title %s", arg))
+			return fmt.Errorf("no task with title %s", arg)
 		}
 		toDelete[idx] = true
 	}
@@ -96,13 +96,29 @@ func Remove(args []string) error {
 	return writeTasks()
 }
 
-func MarkTask(title string, mode taskMode) error {
-	var idx = findByTitle(title)
+func MarkTasks(args []string, mode taskMode) error {
+	var toMark = make(map[int]bool)
 
-	if idx == -1 {
-		return errors.New("no task with such title")
+	for _, arg := range args {
+		if num, err := strconv.Atoi(arg); err == nil {
+			if num > 0 && num <= len(tasks) {
+				toMark[num-1] = true
+				continue
+			}
+		}
+
+		var idx = findByTitle(arg)
+		if idx == -1 {
+			return fmt.Errorf("no task with title %s", arg)
+		}
+		toMark[idx] = true
 	}
 
-	tasks[idx].Mode = mode
+	for idx, b := range toMark {
+		if b {
+			tasks[idx].Mode = mode
+		}
+	}
+
 	return writeTasks()
 }

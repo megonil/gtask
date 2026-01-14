@@ -38,7 +38,7 @@ func ParseAndExecute() {
 	}
 
 	var removeCmd = &cobra.Command{
-		Use:   "remove <index> or <title>",
+		Use:   "remove [<index> or <title>]",
 		Short: "remove taks with <index> or <title>",
 		Args:  cobra.MaximumNArgs(255),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -46,6 +46,20 @@ func ParseAndExecute() {
 		},
 	}
 
-	rootCmd.AddCommand(addCmd, listCmd, removeCmd)
+	var markCmd = &cobra.Command{
+		Use:  "mark [mode] [<index> or <title>]",
+		Args: cobra.MaximumNArgs(255),
+		Run: func(cmd *cobra.Command, args []string) {
+			var mode, err = back.TaskModeFromString(args[0])
+			if err != nil {
+				fmt.Printf("error: %v\n", err.Error())
+				return
+			}
+
+			back.MarkTasks(args[1:], mode)
+		},
+	}
+
+	rootCmd.AddCommand(addCmd, listCmd, removeCmd, markCmd)
 	rootCmd.Execute()
 }

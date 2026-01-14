@@ -18,7 +18,13 @@ func (m taskMode) String() string {
 	}
 }
 
-func taskModeFromString(str string) (taskMode, error) {
+func TaskModeFromString(str string) (taskMode, error) {
+	switch {
+	case checkString(str, "planned"):
+		return modePlanned, nil
+	case checkString(str, "in-progress"):
+		return modeInProgress, nil
+	}
 
 	return 0, nil
 }
